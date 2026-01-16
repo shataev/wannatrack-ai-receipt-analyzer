@@ -78,3 +78,16 @@ class AnalyzerService:
             confidence=round(min(confidence, 1.0), 2),
             language=language,
         )
+
+    async def _analyze_receipt(self, file: str) -> ReceiptResult:
+    # Stub implementation for text analysis
+        return ReceiptResult(
+            type="file",
+            merchant=None,
+            total=0.0,
+            currency="THB",
+            date=None,
+            items=[],
+            confidence=0.2,
+            language="auto",
+        )
