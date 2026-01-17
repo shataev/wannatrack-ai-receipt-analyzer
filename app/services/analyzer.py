@@ -1,5 +1,6 @@
 import re
 from app.schemas.receipt import ReceiptResult, ReceiptItem
+from app.services.llm_analyzer import LLMAnalyzer
 
 
 CURRENCY_MAP = {
@@ -31,9 +32,12 @@ CURRENCY_MAP = {
 
 
 class AnalyzerService:
+    def __init__(self):
+        self.llm_analyzer = LLMAnalyzer()
+
     async def analyze(self, file=None, text=None):
         if text:
-            return self._analyze_text(text)
+            return await self.llm_analyzer.analyze_text(text)
 
         if file:
             return await self._analyze_receipt(file)
