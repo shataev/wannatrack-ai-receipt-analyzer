@@ -1,13 +1,23 @@
 from app.services.llm_analyzer import LLMAnalyzer
 from app.schemas.receipt_llm import ReceiptLLMResult
 from app.schemas.receipt import ReceiptResult, ReceiptItem
-
+from app.services.ocr_service import OCRService
 
 class AnalyzerService:
     def __init__(self):
         self.llm = LLMAnalyzer()
-
+        self.ocr = OCRService()
+        
     async def analyze(self, text: str = None, file=None):
+        if file:
+            # Save uploaded file temporarily
+            file_path = f"/tmp/{file.filename}"
+            with open(file_path, "wb") as f:
+                f.write(await file.read())
+
+            # Extract text via OCR
+            text = self.ocr.extract_text(file_path)
+
         # For now we support text only.
         # File support (OCR) will be added later.
         if text:
