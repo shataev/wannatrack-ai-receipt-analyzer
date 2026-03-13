@@ -34,4 +34,6 @@ Rules:
 - If information is missing, use null
 - Confidence must be between 0 and 1
 - Do not add any explanations
+- If the date is relative (e.g. "yesterday", "2 hours ago", "два часа назад"),
+  return the raw expression as-is.
 """
