@@ -24,4 +24,5 @@ EXPOSE 8000
 
 # Run the FastAPI app with uvicorn (bind to 0.0.0.0 for container access)
 # Pass OPENAI_API_KEY via environment at runtime (e.g. docker run -e or docker-compose env_file)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port $PORT"]
