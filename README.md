@@ -1,120 +1,86 @@
-# Wannatrack AI Receipt Analyzer
+# Wannatrack AI Analyzer
 
-A FastAPI-based service for analyzing receipts and extracting structured data from text or image files.
+FastAPI microservice for AI-powered receipt analysis. Part of the [Wanna Track](https://github.com/shataev/wanna-track) expense tracking system.
 
-## Features
+Accepts a receipt image or plain text, runs OCR if needed, then uses an LLM to extract structured expense data.
 
-- **Receipt Analysis**: Extract structured data from receipt images
-- **Text Analysis**: Parse receipt information from plain text
-- **RESTful API**: Simple HTTP endpoints for integration
-- **Structured Output**: Returns standardized receipt data with items, totals, and metadata
+## Part of the Wanna Track system
 
-## Project Structure
+| Service | Stack | Description |
+|---------|-------|-------------|
+| [wanna-track](https://github.com/shataev/wanna-track) | Vue 3, Vite, Vuetify 3 | Web app for expense management |
+| [wannatrack-receipt-api](https://github.com/shataev/wannatrack-receipt-api) | NestJS, TypeScript, Telegraf | Telegram bot + REST API |
+| **wannatrack-ai-analyzer** | FastAPI, Python | This repo — OCR + LLM receipt parsing |
 
+## Tech stack
+
+- **FastAPI** — REST API
+- **OCR** — image text extraction
+- **LLM (OpenAI)** — structured data extraction from receipt text
+- **Pydantic** — data validation
+
+## API
+
+### `POST /analyze`
+
+Accepts a receipt image or plain text, returns structured expense data.
+
+**Request** (multipart/form-data):
+- `file` — receipt image (optional)
+- `text` — receipt text (optional)
+
+One of the two must be provided.
+
+**Response:**
+```json
+{
+  "merchant": "Tops Supermarket",
+  "total": 350.0,
+  "currency": "THB",
+  "date": "2025-05-01",
+  "items": [
+    { "name": "Milk", "price": 45.0 },
+    { "name": "Bread", "price": 35.0 }
+  ],
+  "confidence": 0.95,
+  "language": "en"
+}
 ```
-wannatrack-ai-analyzer/
-├── app/
-│   ├── main.py              # FastAPI application entry point
-│   ├── routers/
-│   │   └── analyze.py       # API routes for receipt analysis
-│   ├── services/
-│   │   └── analyzer.py      # Business logic for receipt analysis
-│   └── schemas/
-│       └── receipt.py       # Pydantic models for data validation
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
-```
 
-## Installation
+The `confidence` field reflects how reliably the data was extracted. Values below 0.5 indicate uncertain results.
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd wannatrack-ai-analyzer
-```
+## Setup
 
-2. Create a virtual environment:
 ```bash
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running the Application
+Create `.env`:
 
-Start the FastAPI server using uvicorn:
+```env
+OPENAI_API_KEY=your_openai_key
+```
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`
+API available at `http://localhost:8000`
+Interactive docs at `http://localhost:8000/docs`
 
-- API Documentation: `http://localhost:8000/docs`
-- Alternative docs: `http://localhost:8000/redoc`
+## Project structure
 
-## API Endpoints
-
-### POST `/analyze`
-
-Analyzes a receipt from either a file upload or text input.
-
-**Request:**
-- **file** (optional): Receipt image file (multipart/form-data)
-- **text** (optional): Plain text containing receipt information
-
-**Note:** Exactly one of `file` or `text` must be provided.
-
-**Response:**
-```json
-{
-  "type": "receipt" | "text",
-  "merchant": "string | null",
-  "total": 0.0,
-  "currency": "string",
-  "date": "string | null",
-  "items": [
-    {
-      "name": "string",
-      "price": 0.0
-    }
-  ],
-  "confidence": 0.0,
-  "language": "string"
-}
 ```
-
-**Example with curl:**
-
-Using text input:
-```bash
-curl -X POST "http://localhost:8000/analyze" \
-  -F "text=Total: 150.50 THB"
+app/
+├── main.py           # FastAPI entry point
+├── routers/
+│   └── analyze.py    # POST /analyze endpoint
+├── services/
+│   ├── analyzer.py   # Orchestration: validate → OCR → LLM → normalize
+│   ├── ocr_service.py
+│   └── llm_analyzer.py
+└── schemas/
+    └── receipt.py    # Pydantic models
 ```
-
-Using file upload:
-```bash
-curl -X POST "http://localhost:8000/analyze" \
-  -F "file=@receipt.jpg"
-```
-
-## Development
-
-The project uses:
-- **FastAPI**: Modern web framework for building APIs
-- **Pydantic**: Data validation using Python type annotations
-- **Uvicorn**: ASGI server for running the application
-
-## License
-
-[Add your license here]
-
-## Contributing
-
-[Add contribution guidelines here]
-
-
